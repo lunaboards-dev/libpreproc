@@ -34,10 +34,12 @@ function lpp.prefix(prefix, match)
 	return function(str, inst, offset)
 		offset = offset or 0
 		local positions = table.pack(prefix:find(str))
+		--print(prefix.pattern, table.unpack(positions))
 		if not positions[1] then return end
 		local st, en = table.remove(positions, 1), table.remove(positions, 1)
 		local result = match(str, inst, en+1, en+1)
-		if not result or result.start ~= en+1 then return end
+		--print(prefix.pattern, result)
+		if not result or (result.start ~= en+1 and result.size ~= 0 and en ~= 0) then return end
 		for i=1, #result.matches do
 			table.insert(positions, result.matches[i])
 		end
@@ -56,7 +58,7 @@ function lpp.linestart(match)
 		offset = offset or 0
 		local result = match(str, inst, offset)
 		if not result then return end
-		local dat = str:peek(result.start)
+		local dat = str:peek(offset-1)
 		if dat:sub(#dat, #dat) == "\n" then
 			return result
 		end
@@ -117,10 +119,13 @@ end
 function lpp.inner_prefix(prefix, match)
 	prefix = lpp.pattern(prefix, true)
 	return function(str, inst, offset)
+		offset = offset or 0
 		local result = match(str, inst, offset)
+		--print("inner", prefix.pattern, result)
 		if not result then return end
 		local inner = table.remove(result.matches)
 		local matches = table.pack(inner:find(prefix.pattern, 1, prefix.raw))
+		--print("inner", prefix.pattern, table.unpack(matches))
 		if not matches[1] then return end
 		local st, en = table.remove(matches, 1), table.remove(matches, 1)
 		if en == 0 then

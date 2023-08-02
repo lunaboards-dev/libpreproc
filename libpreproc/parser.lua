@@ -27,7 +27,8 @@ function parser:compile(code, name)
 			if result then
 				first_match = first_match or result
 				processor = processor or self.tokens[i].process
-				if first_match.start < result.start then
+				if first_match.start > result.start then
+					print(string.format("%d: closer match (%d < %d)", i, result.start, first_match.start))
 					processor = self.tokens[i].process
 					first_match = result
 				end
@@ -45,13 +46,19 @@ function parser:compile(code, name)
 		self:emit(emitting)
 	end
 	self.code = table.concat(self.gencode, " ")
-	local env = setmetatable({write = function(s)
-		table.insert(self.output, s)
-	end}, {__index=function(_, i)
-		return self.export[i] or self.env[i] or _G[i]
-	end, __newindex=function(_, k, v)
-		self.export[k] = v
-	end})
+	local env = setmetatable({
+		_INSTANCE = self,
+		write = function(s)
+			table.insert(self.output, s)
+		end
+	}, {
+		__index=function(_, i)
+			return self.export[i] or self.env[i] or _G[i]
+		end, __newindex=function(_, k, v)
+			self.export[k] = v
+		end
+	})
+	--print(self.code)
 	self.gen = assert(load(self.code, (name and "="..name), "t", env))
 	self.name = name
 	return num_matches
