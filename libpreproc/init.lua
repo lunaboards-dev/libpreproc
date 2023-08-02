@@ -33,12 +33,10 @@ function lpp.prefix(prefix, match)
 	prefix = lpp.pattern(prefix, true)
 	return function(str, inst, offset)
 		offset = offset or 0
-		print("pfx", prefix:find(str))
 		local positions = table.pack(prefix:find(str))
 		if not positions[1] then return end
 		local st, en = table.remove(positions, 1), table.remove(positions, 1)
 		local result = match(str, inst, en+1, en+1)
-		print(result)
 		if not result or result.start ~= en+1 then return end
 		for i=1, #result.matches do
 			table.insert(positions, result.matches[i])
@@ -55,6 +53,7 @@ end
 
 function lpp.linestart(match)
 	return function(str, inst, offset)
+		offset = offset or 0
 		local result = match(str, inst, offset)
 		if not result then return end
 		local dat = str:peek(result.start)
@@ -66,9 +65,10 @@ end
 
 function lpp.filestart(match)
 	return function(str, inst, offset)
+		offset = offset or 0
 		if offset+str:tell() > 1 then return nil end
 		local result = match(str, inst, offset)
-		if result.start == 1 then
+		if result and result.start == 1 then
 			return result
 		end
 	end

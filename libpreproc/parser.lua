@@ -22,7 +22,7 @@ function parser:compile(code, name)
 	while true do
 		local first_match, processor
 		for i=1, #self.tokens do
-			print("tok", i)
+			--print("tok", i)
 			local result = self.tokens[i].match(self.stream, self)
 			if result then
 				first_match = first_match or result

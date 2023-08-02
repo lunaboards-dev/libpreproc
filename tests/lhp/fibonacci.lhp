@@ -1,0 +1,10 @@
+<ol>
+	<?lua
+		-- Print the first ten digits of the fibonacci sequence
+		local a, b = 0, 1
+		for n=1, 10 do ?>
+			<li><?lua= a ?></li>
+	<?lua	a, b = b, a + b
+		end
+	?>
+</ol>
